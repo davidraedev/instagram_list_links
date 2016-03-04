@@ -11,7 +11,10 @@
 // @exclude      /^https?:\/\/www\.instagram\.com\/(explore|accounts|emails).*\/?$/
 // @downloadURL  https://github.com/daraeman/instagram_list_links/raw/master/instagram_list_links.user.js
 // @updateURL    https://github.com/daraeman/instagram_list_links/raw/master/instagram_list_links.meta.js
+// @grant        none
 // ==/UserScript==
+/* jshint -W097 */
+'use strict';
 
 function doScroll( scroll_duration ) {
 	scroll_duration = scroll_duration || 500;
@@ -153,14 +156,28 @@ function main(){
 	}
 }
 
-var last_document_height,
-	interval,
-	images = [],
-	videos = [];
+function isPrivate() {
+	if ( window._sharedData.entry_data.ProfilePage[0].user.is_private )
+		return ! window._sharedData.entry_data.ProfilePage[0].user.followed_by_viewer;
+	return false;
+}
 
-var button = jQuery( '<div style="position: absolute; right: 0px; padding: 9px 27px; border: 1px solid rgb( 235,235,235 ); color: rgb( 170,170,170 ); background: rgb( 255,255,255 ); z-index: 1000; cursor: pointer;">List Links</div>' )
+function init() {
+	if ( isPrivate() )
+		return false;
+
+	button = jQuery( '<div style="position: absolute; right: 0px; padding: 9px 27px; border: 1px solid rgb( 235,235,235 ); color: rgb( 170,170,170 ); background: rgb( 255,255,255 ); z-index: 1000; cursor: pointer;">List Links</div>' )
 				.click(function(){
 					main();
 				});
-jQuery( "nav" ).first().append( button );
-button.css( "bottom", -( button.outerHeight() ) + "px" );
+	jQuery( "nav" ).first().append( button );
+	button.css( "bottom", -( button.outerHeight() ) + "px" );
+}
+
+var last_document_height,
+	interval,
+	images = [],
+	videos = [],
+	button;
+
+init();

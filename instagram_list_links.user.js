@@ -4,8 +4,8 @@
 // @description  Userscript that lets you back up your instagram media
 // @homepageURL  https://github.com/daraeman/instagram_list_links
 // @author       daraeman
-// @version      1.0
-// @date         2016-02-16
+// @version      1.1
+// @date         2016-03-04
 // @include      /^https?:\/\/www\.instagram\.com\/.*\/?$/
 // @exclude      /^https?:\/\/www\.instagram\.com\/?$/
 // @exclude      /^https?:\/\/www\.instagram\.com\/(explore|accounts|emails).*\/?$/

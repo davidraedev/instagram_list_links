@@ -66,6 +66,7 @@ function isStillLoading() {
 }
 
 function getImages( callback ) {
+
 	jQuery( "img" ).each(function(){
 		var el = jQuery(this);
 		var id = el.attr( "id" );
@@ -91,7 +92,6 @@ function getImages( callback ) {
 		});
 	}
 
-	
 }
 
 function getVideoLinks( callback ) {
@@ -162,9 +162,37 @@ function isPrivate() {
 	return false;
 }
 
+function generateLocalStorageKey( id ) {
+	return localstorage_key + "_" + id;
+}
+
+function saveDataLocal() {
+	localStorage.setItem( generateLocalStorageKey( getUserId() ), JSON.stringify( {
+		images: images,
+		videos: videos
+	}));
+}
+
+function getDataLocal() {
+	data = localStorage.getItem( generateLocalStorageKey( getUserId() ) );
+	if ( ! data )
+		return false;
+	data = JSON.parse( data );
+}
+
+function saveData() {
+	saveDataLocal();
+}
+
+function getUserId() {
+	return window._sharedData.entry_data.ProfilePage[0].user.id;
+}
+
 function init() {
 	if ( isPrivate() )
 		return false;
+
+	getDataLocal();
 
 	button = jQuery( '<div style="position: absolute; right: 0px; padding: 9px 27px; border: 1px solid rgb( 235,235,235 ); color: rgb( 170,170,170 ); background: rgb( 255,255,255 ); z-index: 1000; cursor: pointer;">List Links</div>' )
 				.click(function(){
@@ -176,8 +204,12 @@ function init() {
 
 var last_document_height,
 	interval,
+	data = {};
 	images = [],
 	videos = [],
-	button;
+	button,
+	localstorage_key = "instagram_list_links";
 
 init();
+
+//window._sharedData.entry_data.ProfilePage[0].user.media.count

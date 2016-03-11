@@ -4,13 +4,11 @@
 // @description  Userscript that lets you back up your instagram media
 // @homepageURL  https://github.com/daraeman/instagram_list_links
 // @author       daraeman
-// @version      1.1
-// @date         2016-03-04
+// @version      1.1.1
+// @date         2016-03-10
 // @include      /^https?:\/\/www\.instagram\.com\/.*\/?$/
 // @exclude      /^https?:\/\/www\.instagram\.com\/?$/
 // @exclude      /^https?:\/\/www\.instagram\.com\/(explore|accounts|emails).*\/?$/
-// @downloadURL  https://github.com/daraeman/instagram_list_links/raw/master/instagram_list_links.user.js
-// @updateURL    https://github.com/daraeman/instagram_list_links/raw/master/instagram_list_links.meta.js
 // @grant        none
 // ==/UserScript==
 /* jshint -W097 */
@@ -59,7 +57,8 @@ function isStillLoading() {
 	var check = false;
 	jQuery( "a" ).each(function(){
 		if ( /Loading more/i.test( jQuery(this).text() ) ) {
-			check = true; return false;
+			check = true;
+			return false;
 		}
 	});
 	return check;
@@ -70,17 +69,20 @@ function getImages( callback ) {
 		var el = jQuery(this);
 		var id = el.attr( "id" );
 		if ( /^pImage/.test( id ) ) {
-			var video_check = el.parent().parent().next().find( "span" );
-			if ( /video/i.test( video_check.text() ) ) {
-				videos.push({
-					el: el.parent().parent().parent()
-				});
-			}
-			else {
-				images.push({
-					src: el.attr( "src" ),
-					text: el.attr( "alt" )
-				});
+			var all_check = el.parent().parent().parent()[0].nodeName.toLowerCase() == "a";
+			if ( all_check ) {
+				var video_check = el.parent().parent().next().find( "span" );
+				if ( /video/i.test( video_check.text() ) ) {
+					videos.push({
+						el: el.parent().parent().parent()
+					});
+				}
+				else {
+					images.push({
+						src: el.attr( "src" ),
+						text: el.attr( "alt" )
+					});
+				}
 			}
 		}
 	});
@@ -90,14 +92,14 @@ function getImages( callback ) {
 			printImages();
 		});
 	}
-
-	
 }
 
 function getVideoLinks( callback ) {
 	var videos_left = ( videos.length - 1 );
 	var in_view = false;
 	var current_video = 0;
+	var max_retry = 20;
+	var current_retry = 0;
 	var interval_a = setInterval(function(){
 		if ( ! in_view ) {
 			videos[ current_video ].el[0].click();
@@ -117,18 +119,27 @@ function getVideoLinks( callback ) {
 				videos_left--;
 				current_video++;
 			}
+			else {
+				if ( current_retry == max_retry ) {
+					current_retry = 0;
+					in_view = false;
+				}
+				else {
+					current_retry++;
+				}
+			}
 		}
-	}, 200 );
+	}, video_interval_duration );
 }
 
 
 function printImages() {
 	var img_txt = "";
-	for ( i = 0; i < images.length; i++ )
+	for ( var i = 0; i < images.length; i++ )
 		img_txt += images[ i ].src + "\n";
 
 	var vid_txt = "";
-	for ( i = 0; i < videos.length; i++ )
+	for ( var i = 0; i < videos.length; i++ )
 		vid_txt += videos[ i ].src + "\n";
 
 	jQuery( "#react-root main" ).append( '<textarea style="width:90%;margin:30px auto;">'+ img_txt +'</textarea><textarea style="width:90%;margin:30px auto;">'+ vid_txt +'</textarea>' );
@@ -174,10 +185,13 @@ function init() {
 	button.css( "bottom", -( button.outerHeight() ) + "px" );
 }
 
+console.log( "Instagram List Links userscript loaded" );
+
 var last_document_height,
 	interval,
 	images = [],
 	videos = [],
-	button;
+	button,
+	video_interval_duration = 500;
 
 init();
